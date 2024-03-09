@@ -26,27 +26,31 @@ def send_telegram(text: str):
         raise Exception("post_text error")
 
 def get_txt(prompt: str):
-    token = config.get('bot', 'token')
-    openai.api_key = token
-    model = config.get('bot', 'model')
-    max_tokens = int(config.get('bot', 'max_tokens'))
-    temperature = float(config.get('bot', 'temperature'))
+    try:
+        token = config.get('bot', 'token')
+        openai.api_key = token
+        model = config.get('bot', 'model')
+        max_tokens = int(config.get('bot', 'max_tokens'))
+        temperature = float(config.get('bot', 'temperature'))
 
-    prompt = f'''
-Snow, Снег, 🌨
-Rain, Дождь, 🌧
-Sunny, Солнечно, ☀
-{prompt},'''
+        prompt = f'''
+    Snow, Снег, 🌨
+    Rain, Дождь, 🌧
+    Sunny, Солнечно, ☀
+    {prompt},'''
 
-    completion = openai.Completion.create(
-        engine=model,
-        prompt=prompt,
-        max_tokens=max_tokens,
-        temperature=temperature
-    )
-    txt = completion.choices[0].text
-    txt = txt.split(',')
-    return txt[1].strip(), txt[0].strip()
+        completion = openai.Completion.create(
+            engine=model,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temperature=temperature
+        )
+        txt = completion.choices[0].text
+        txt = txt.split(',')
+        return txt[1].strip(), txt[0].strip()
+
+    except:
+        return None, None
 
 def get_weather(today_text):
     tt = '??'
@@ -74,6 +78,10 @@ def get_weather(today_text):
         tt = '☀'
         t_text = 'Солнечно'
 
+    elif today_text == 'Mostly Sunny':
+        tt = '☀'
+        t_text = 'Ясно-Солнечно'
+
     elif today_text == 'Partly Cloudy':
         tt = '⛅️'
         t_text = 'Переменная облачность'
@@ -94,9 +102,22 @@ def get_weather(today_text):
         tt = '🌧'
         t_text = 'Дождь со снегом'
 
+    elif today_text == 'Flurries':
+        tt = '🌧'
+        t_text = 'Легкий снег'
+
     elif today_text == 'Scattered Thunderstorms':
         tt = '⛈️'
         t_text = 'Разбросанные грозы'
+
+    elif today_text == 'Scattered Showers':
+        tt = '⛈️'
+        t_text = 'Разрозненные дожди'
+
+    elif today_text == 'Thunderstorms':
+        tt = '⚡'
+        t_text = 'Гроза'
+
 
     return tt, t_text
 
@@ -122,7 +143,8 @@ def temperature():
 
     pressure = r['current_observation']['atmosphere']['pressure']
 
-    tt, t_text = get_txt(today_text)
+    #tt, t_text = get_txt(today_text)
+    tt, t_text = get_weather(today_text)
 
     tomorrow = r["forecasts"]
     #print(tomorrow)
@@ -131,8 +153,8 @@ def temperature():
     tom_text = tomorrow[0]['text']
     print(tom_tem_min, tom_tem_max, tom_text)
 
-    #tmt, tm_text = get_weather(tom_text)
-    tmt, tm_text = get_txt(tom_text)
+    tmt, tm_text = get_weather(tom_text)
+    #tmt, tm_text = get_txt(tom_text)
 
     txt = f'''Сегодня: t= {today_tem}°C
 {tt} {t_text}

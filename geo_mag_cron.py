@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import time
 import configparser
 import os
-import openai
+#import openai
 
 config = configparser.ConfigParser()
 path_db = os.path.abspath(os.path.join(os.path.dirname(__file__), "config.ini"))
